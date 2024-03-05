@@ -14,18 +14,6 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    createdBy   User   @relation(fields: [createdById], references: [id])
-    createdById String
-
-    @@index([name])
-}
-
 // Necessary for Next auth
 model Account {
     id                String  @id @default(cuid())
@@ -53,15 +41,200 @@ model Session {
     user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model Dentiste {
+    id         String    @id @default(cuid())
+    userId     String    @unique
+    specialite String
+    user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    rdv        Rdv[]
+    Dossier    Dossier[]
+}
+
+model Secretaire {
+    id         String @id @default(cuid())
+    userId     String @unique
+    permission String
+    user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    Rdv        Rdv[]
+}
+
 model User {
-    id            String    @id @default(cuid())
+    id            String      @id @default(cuid())
     name          String?
-    email         String?   @unique
+    personneId    String      @unique
+    email         String?     @unique
     emailVerified DateTime?
     image         String?
     accounts      Account[]
     sessions      Session[]
-    posts         Post[]
+    personne      Personne    @relation(fields: [personneId], references: [id], onDelete: Cascade)
+    secretaire    Secretaire?
+    dentist       Dentiste?
+}
+
+enum Genre {
+    homme
+    famme
+}
+
+model Personne {
+    id             String        @id @default(cuid())
+    cin            Int           @unique
+    nom            String
+    prenom         String
+    genre          Genre
+    date_Naissance DateTime
+    lieu_Naissance String
+    adresse        String
+    num_tel        String
+    email          String?       @unique
+    user           User?
+    fiche_patient  FichePatient?
+}
+
+enum EtatCivil {
+    marie
+    divorce
+    celibataire
+}
+
+model FichePatient {
+    id         String    @id @default(cuid())
+    personneId String    @unique
+    date_fiche DateTime
+    profession String
+    code_APCI  String
+    etat_civil EtatCivil
+    personne   Personne  @relation(fields: [personneId], references: [id], onDelete: Cascade)
+    rdv        Rdv[]
+    CNAM       CNAM?
+    Dossier    Dossier[]
+}
+
+model CNAM {
+    id             String       @id @default(cuid())
+    date_val       DateTime
+    type_CNAM      String
+    fichePatientId String       @unique
+    fichePatient   FichePatient @relation(fields: [fichePatientId], references: [id], onDelete: Cascade)
+}
+
+model Dossier {
+    id             String         @id @default(cuid())
+    createdAt      DateTime       @default(now())
+    fichePatientId String
+    dentisteId     String
+    fichePatient   FichePatient   @relation(fields: [fichePatientId], references: [id], onDelete: Cascade)
+    dentiste       Dentiste       @relation(fields: [dentisteId], references: [id], onDelete: Cascade)
+    antecedent     Antecedent[]
+    Consultation   Consultation[]
+}
+
+model Consultation {
+    id         String       @id @default(cuid())
+    date_debut DateTime
+    duree      Int
+    type       String
+    diagnostic String
+    dossierId  String
+    dossier    Dossier      @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+    ordonnance Ordonnance[]
+    Certificat Certificat?
+}
+
+model Certificat {
+    id                 String              @id @default(cuid())
+    CIN                String
+    nom                String
+    prenom             String
+    date_nai           DateTime
+    description        String
+    consultationId     String              @unique
+    consultation       Consultation        @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+    CertificatApti     CertificatApti?
+    CertificatRopos    CertificatRopos?
+    CertificatDispense CertificatDispense?
+}
+
+model CertificatApti {
+    id           String     @id @default(cuid())
+    etat         String
+    prof         String
+    certificatId String     @unique
+    certificat   Certificat @relation(fields: [certificatId], references: [id], onDelete: Cascade)
+}
+
+model CertificatRopos {
+    id           String     @id @default(cuid())
+    nbr_jour     String
+    certificatId String     @unique
+    certificat   Certificat @relation(fields: [certificatId], references: [id], onDelete: Cascade)
+}
+
+model CertificatDispense {
+    id              String     @id @default(cuid())
+    nbr_jour        String
+    date_debut_disp DateTime   @default(now())
+    certificatId    String     @unique
+    certificat      Certificat @relation(fields: [certificatId], references: [id], onDelete: Cascade)
+}
+
+model Ordonnance {
+    id             String       @id @default(cuid())
+    date_ord       DateTime     @default(now())
+    nom_med        String
+    dosage_med     String
+    nbre_fois_med  String
+    quand_med      String
+    consultationId String
+    consultation   Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+}
+
+model Examen {
+    id                   String                 @id @default(cuid())
+    description          String
+    examenComplementaire ExamenComplementaire[]
+    ExamenSimple         ExamenSimple[]
+}
+
+model ExamenComplementaire {
+    id       String  @id @default(cuid())
+    photo    String?
+    fichier  String?
+    examenId String
+    examen   Examen  @relation(fields: [examenId], references: [id], onDelete: Cascade)
+}
+
+model ExamenSimple {
+    id       String  @id @default(cuid())
+    taille   Decimal
+    poid     Decimal
+    ten      Decimal
+    perim    Decimal
+    temp     Decimal
+    examenId String
+    examen   Examen  @relation(fields: [examenId], references: [id], onDelete: Cascade)
+}
+
+model Antecedent {
+    id          String  @id @default(cuid())
+    description String
+    medication  String
+    dossierId   String
+    dossier     Dossier @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+}
+
+model Rdv {
+    id             String       @id @default(cuid())
+    date_rdv       DateTime
+    duree          Int
+    presence       Boolean
+    dentisteId     String
+    fichePatientId String
+    secretaireId   String
+    dentiste       Dentiste     @relation(fields: [dentisteId], references: [id], onDelete: Cascade)
+    fiche_patient  FichePatient @relation(fields: [fichePatientId], references: [id], onDelete: Cascade)
+    secretaire     Secretaire   @relation(fields: [secretaireId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {
