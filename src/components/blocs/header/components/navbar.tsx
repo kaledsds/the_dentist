@@ -1,43 +1,33 @@
-import Link from "next/link";
+"use client";
+
 import {
   NavigationMenu,
-  NavigationMenuContent,
   NavigationMenuItem,
-  NavigationMenuLink,
   NavigationMenuList,
-  NavigationMenuTrigger,
 } from "~/components/ui/navigation-menu";
+import { AvatarDropdown, ModeToggle, NavItems } from ".";
 
 export const Navbar = () => {
   return (
     <>
+      <h1 className="text-2xl font-bold text-primary">The Dentist</h1>
       <NavigationMenu>
-        <NavigationMenuList>
+        <NavigationMenuList className="w-full gap-2">
+          <NavigationMenuItem>{/* <MovieCategory /> */}</NavigationMenuItem>
+          <NavigationMenuItem>{/* <SerieCategory /> */}</NavigationMenuItem>
           <NavigationMenuItem>
-            <NavigationMenuTrigger>test</NavigationMenuTrigger>
-            <NavigationMenuContent>
-              <NavigationMenuLink>
-                <Link href="/">Link</Link>
-              </NavigationMenuLink>
-            </NavigationMenuContent>
+            <NavItems />
           </NavigationMenuItem>
         </NavigationMenuList>
       </NavigationMenu>
-      {/* <Drawer>
-  <DrawerTrigger>Open</DrawerTrigger>
-  <DrawerContent>
-    <DrawerHeader>
-      <DrawerTitle>Are you absolutely sure?</DrawerTitle>
-      <DrawerDescription>This action cannot be undone.</DrawerDescription>
-    </DrawerHeader>
-    <DrawerFooter>
-      <Button>Submit</Button>
-      <DrawerClose>
-        <Button variant="outline">Cancel</Button>
-      </DrawerClose>
-    </DrawerFooter>
-  </DrawerContent>
-</Drawer> */}
+      <NavigationMenu>
+        <NavigationMenuList className="w-full gap-2">
+          {/* <SearchDrawer /> */}
+          <ModeToggle />
+          <AvatarDropdown />
+          {/* <SideBar /> */}
+        </NavigationMenuList>
+      </NavigationMenu>
     </>
   );
 };

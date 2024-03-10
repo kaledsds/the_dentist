@@ -2,7 +2,7 @@ import { Navbar } from "./components";
 
 export const Header = () => {
   return (
-    <header className="top-0 flex w-full items-center justify-between p-4">
+    <header className="flex w-full items-center justify-between bg-gradient-to-l from-transparent via-primary to-transparent p-4">
       <Navbar />
     </header>
   );

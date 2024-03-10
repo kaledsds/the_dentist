@@ -2,6 +2,7 @@ import "~/styles/globals.css";
 import { Inter } from "next/font/google";
 import { twMerge } from "tailwind-merge";
 import { Header } from "~/components/blocs";
+import { ThemeProvider } from "~/providers";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -27,8 +28,15 @@ export default function RootLayout({
           inter.variable,
         )}
       >
-        <Header />
-        {children}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <Header />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
